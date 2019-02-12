@@ -1,0 +1,113 @@
+// Nagy Péter
+// M07ILF
+//statfiz beadandó
+//2018.04.9.
+//oprendszer:windows10
+//IDE:VS
+
+
+#include "stdafx.h"
+
+#include <array>    
+#include <numeric>  
+#include <iomanip>  
+#include <iostream> 
+#include <fstream>
+#include <random>   
+#include <math.h>
+
+
+
+
+//random szám 0 és 1 között
+double veletlen() {
+	std::random_device rd;
+	std::mt19937 Generator(rd());
+	std::uniform_real_distribution<double> Distribution(0, 1);
+	return Distribution(Generator);
+}
+//random szám 0 és 99 között
+double veletlen2() {
+	int a;
+	std::random_device rd;
+	std::mt19937 Generator(rd());
+	std::uniform_real_distribution<double> Distribution(0, 1);
+	a=100*Distribution(Generator);
+	return a;
+}
+
+//választok egy random irányt
+double spin() {
+	double c = veletlen();
+	double a;
+	if (c>0.5) {
+		a = -1;
+	}
+	else {
+		a = 1;
+	}
+	return a;
+}
+
+//kiszámolom az energia megváltozását
+double energia(double a, double b, double c) {
+	double E = 2 * a*(b + c);
+	return E;
+}
+
+
+
+int main() {
+	double b;
+	int ciklusszam;
+	double a[100];
+
+
+	//bekérem a szükséges változókat
+	std::cout << "adja meg a megadott parametert" << std::endl;
+	std::cin >> b;
+	std::cout << "adja meg hanyszor vegezzuk el a lepest" << std::endl;
+	std::cin >> ciklusszam;
+
+
+	//véletlen spinek bepakolása és fileba iratása
+	std::ofstream dataFile("alap.data");
+	for (int i = 0; i < 100; i++) {
+		double e;
+		e = spin();
+		std::cout << e << std::endl;
+		a[i] = e;
+		dataFile << a[i] << std::endl;
+		std::cout << a[i] << std::endl;
+	}
+	dataFile.close();
+
+
+	//véletlen spin választás és forgatás
+	for (int i = 0; i < ciklusszam; i++) {
+		int b = veletlen2();
+		std::cout <<"parameterek"<<std::endl<< b <<'\t'<< a[b] << '\t' << a[b-1] << '\t' << a[b+1] << '\t' << energia(a[b], a[b - 1], a[b + 1] )<<std::endl;
+			if (energia(a[b], a[b-1], a[b+1])<0) {
+				a[b] = -a[b];
+			}
+				if (energia(a[b], a[b - 1], a[b + 1])==0) {
+					if (veletlen() < 0.5) {
+						a[b] = -a[b];
+					}
+				}
+					if (energia(a[b], a[b - 1], a[b + 1])>0) {
+						if (veletlen() < exp(b*energia(a[b], a[b - 1], a[b + 1]))) {
+							a[b] = -a[b];
+						}
+					}
+	}
+
+	//a megforgatott spinek kiiratása
+	std::ofstream dataFile2("forgatot.data");
+	for (int i = 0; i < 100; i++) {
+		std::cout<<a[i]<<std::endl;
+		dataFile2 << a[i] << std::endl;
+	}
+	dataFile2.close();
+}
+
